@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"crypto/tls"
 )
 
 const relpVersion = 0
@@ -178,8 +179,9 @@ func NewServer(host string, port int, autoAck bool) (server Server, err error) {
 }
 
 // NewClientTimeout - Starts a new RELP client with Dial timeout set
-func NewClientTimeout(host string, port int, timeout time.Duration) (client Client, err error) {
-	client.connection, err = net.DialTimeout("tcp", fmt.Sprintf("%s:%d", host, port), timeout)
+func NewClientTimeout(host string, port int, timeout time.Duration, config *tls.Config) (client Client, err error) {
+	//client.connection, err = net.DialTimeout("tcp", fmt.Sprintf("%s:%d", host, port), timeout)
+	client.connection, err = tls.DialWithDialer(&net.Dialer{Timeout: timeout}, "tcp", fmt.Sprintf("%s:%d", host, port), config)
 	if err != nil {
 		return client, err
 	}
@@ -210,8 +212,14 @@ func NewClientTimeout(host string, port int, timeout time.Duration) (client Clie
 
 // NewClient - Starts a new RELP client with Dial timeout set
 func NewClient(host string, port int) (client Client, err error) {
-	return NewClientTimeout(host, port, 0)
+	return NewClientTimeout(host, port, 0, nil)
 }
+
+// NewClient - Starts a new RELP TLS client with Dial timeout set
+func NewClientTLS(host string, port int, tlsconfig *tls.Config) (client Client, err error) {
+        return NewClientTimeout(host, port, 0, tlsconfig)
+}
+
 
 // Close - Stops listening for connections and closes the message channel
 func (s Server) Close() {
