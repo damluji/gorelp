@@ -212,7 +212,7 @@ func NewClientTimeout(host string, port int, timeout time.Duration, config *tls.
 
 // NewClient - Starts a new RELP client with Dial timeout set
 func NewClient(host string, port int) (client Client, err error) {
-	return NewClientTimeout(host, port, 0, nil)
+	return NewClientTimeout(host, port, 0, tls.Config{ServerName:*host,InsecureSkipVerify: true,})
 }
 
 // NewClient - Starts a new RELP TLS client with Dial timeout set
